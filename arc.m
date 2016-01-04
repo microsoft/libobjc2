@@ -19,7 +19,7 @@ pthread_key_t ARCThreadKey;
 
 extern void _NSConcreteMallocBlock;
 extern void _NSConcreteStackBlock;
-extern void _NSConcreteGlobalBlock;
+extern struct objc_class _NSConcreteGlobalBlock;
 
 @interface NSAutoreleasePool
 + (Class)class;
@@ -225,6 +225,12 @@ static inline id retain(id obj)
 {
 	if (isSmallObject(obj)) { return obj; }
 	Class cls = obj->isa;
+
+	if ((Class)&_NSConcreteGlobalBlock == cls->isa)
+	{
+		cls = cls->isa;
+	}
+
 	if ((Class)&_NSConcreteMallocBlock == cls ||
 	    (Class)&_NSConcreteStackBlock == cls)
 	{
@@ -287,13 +293,14 @@ static inline void release(id obj)
 {
 	if (isSmallObject(obj)) { return; }
 	Class cls = obj->isa;
+
 	if (cls == &_NSConcreteMallocBlock)
 	{
 		_Block_release(obj);
 		return;
 	}
 	if ((cls == &_NSConcreteStackBlock) ||
-	    (cls == &_NSConcreteGlobalBlock))
+	    (cls->isa == &_NSConcreteGlobalBlock))
 	{
 		return;
 	}
