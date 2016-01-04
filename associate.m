@@ -166,10 +166,11 @@ static void setReference(struct reference_list *list,
 		lock = lock_for_pointer(r);
 		lock_spinlock(lock);
 	}
-	r->policy = policy;
+	uintptr_t oldPolicy = r->policy;
 	id old = r->object;
+	r->policy = policy;
 	r->object = obj;
-	if (OBJC_ASSOCIATION_ASSIGN != r->policy)
+	if (OBJC_ASSOCIATION_ASSIGN != oldPolicy)
 	{
 		objc_release(old);
 	}
