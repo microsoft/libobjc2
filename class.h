@@ -300,6 +300,10 @@ static inline Class classForObject(id obj)
 			return SmallObjectClasses[(addr & OBJC_SMALL_OBJECT_MASK)];
 		}
 	}
+	extern struct objc_class _NSConcreteGlobalBlock;
+	if (obj->isa->isa == (Class)&_NSConcreteGlobalBlock) {
+		return (Class)&_NSConcreteGlobalBlock;
+	}
 	return obj->isa;
 }
 
