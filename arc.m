@@ -57,10 +57,11 @@ struct arc_tls
 	id returnRetained;
 };
 
+static __thread struct arc_tls _arcTls;
 static inline struct arc_tls* getARCThreadData(void)
 {
 #ifdef NO_PTHREADS
-	return NULL;
+	return &_arcTls;
 #else
 	struct arc_tls *tls = pthread_getspecific(ARCThreadKey);
 	if (NULL == tls)
