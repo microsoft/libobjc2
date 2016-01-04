@@ -10,11 +10,11 @@
 #define BOOL _WINBOOL
 #	include <windows.h>
 #undef BOOL
-typedef HANDLE mutex_t;
-#	define INIT_LOCK(x) x = CreateMutex(NULL, FALSE, NULL)
-#	define LOCK(x) WaitForSingleObject(*x, INFINITE)
-#	define UNLOCK(x) ReleaseMutex(*x)
-#	define DESTROY_LOCK(x) CloseHandle(*x)
+typedef CRITICAL_SECTION mutex_t;
+#	define INIT_LOCK(x) InitializeCriticalSection(&(x))
+#	define LOCK(x) EnterCriticalSection(x)
+#	define UNLOCK(x) LeaveCriticalSection(x)
+#	define DESTROY_LOCK(x) DeleteCriticalSection(x)
 #else
 
 #	include <pthread.h>
