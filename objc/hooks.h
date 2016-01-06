@@ -30,13 +30,13 @@ OBJC_HOOK void (*_objc_load_callback)(Class cls, struct objc_category *category)
  * The hook used for fast proxy lookups.  This takes an object and a selector
  * and returns the instance that the message should be forwarded to.
  */
-extern id (*objc_proxy_lookup)(id receiver, SEL op);
+OBJC_HOOK id (*objc_proxy_lookup)(id receiver, SEL op);
 /**
  * New runtime forwarding hook.  This might be removed in future - it's
  * actually no more expressive than the forward2 hook and forces Foundation to
  * do some stuff that the runtime is better suited to.
  */
-extern struct objc_slot *(*__objc_msg_forward3)(id, SEL);
+OBJC_HOOK struct objc_slot *(*__objc_msg_forward3)(id, SEL);
 /**
  * Forwarding hook.  Takes an object and a selector and returns a method that
  * handles the forwarding.
@@ -66,7 +66,7 @@ OBJC_HOOK Class (*_objc_class_for_boxing_foreign_exception)(int64_t exceptionCla
  * receiver.  This should return the slot to use instead, although it may throw
  * an exception or perform some other action.
  */
-extern struct objc_slot* (*_objc_selector_type_mismatch)(Class cls, 
+OBJC_HOOK struct objc_slot* (*_objc_selector_type_mismatch)(Class cls,
        SEL selector, struct objc_slot *result);
 
 /**
