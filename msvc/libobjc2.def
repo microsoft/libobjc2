@@ -1,0 +1,199 @@
+LIBRARY libobjc2
+    EXPORTS
+        ; Exported Classes (and Names)
+        _OBJC_CLASS_Object       DATA
+        __objc_class_name_Object CONSTANT
+
+        ; Block classes (Compiler Contract)
+        _NSConcreteGlobalBlock CONSTANT
+        _NSConcreteStackBlock  CONSTANT
+
+        ; Hooks (Overridable Behaviour)
+        objc_proxy_lookup          CONSTANT
+        __objc_msg_forward2        CONSTANT
+        __objc_msg_forward3        CONSTANT
+        _objc_weak_load            CONSTANT
+        _objc_enumeration_mutation CONSTANT
+        objc_create_block_classes_as_subclasses_of
+        objc_setDeveloperMode_np
+
+        ; Loader (Compiler Contract)
+        __objc_exec_class
+        __objc_load_modules
+
+        ; Block methods
+        _Block_copy
+        _Block_object_assign
+        _Block_object_dispose
+        _Block_release
+        block_copyIMPTypeEncoding_np
+        block_getType_np
+
+        ; Type Encoding
+        objc_aligned_size
+        objc_sizeof_type
+        objc_alignof_type
+        objc_skip_typespec
+        objc_skip_argspec
+
+        ; ARC (Compiler Contract)
+        objc_storeStrong
+        objc_storeWeak
+        objc_initWeak
+        objc_loadWeak
+        objc_loadWeakRetained
+        objc_moveWeak
+        objc_copyWeak
+        objc_autorelease
+        objc_autoreleasePoolPop
+        objc_autoreleasePoolPush
+        objc_autoreleaseReturnValue
+        objc_arc_autorelease_count_for_object_np
+        objc_arc_autorelease_count_np
+        objc_release
+        objc_retain
+        objc_retainAutorelease
+        objc_retainAutoreleasedReturnValue
+        objc_retainAutoreleaseReturnValue
+        objc_retainBlock
+
+        ; Message Dispatch (Compiler Contract)
+        objc_msgSend
+        objc_msgSend_stret
+        objc_msgSend_fpret
+        objc_slot_lookup_super
+        objc_msg_lookup
+        objc_msg_lookup_sender
+        objc_msg_lookup_super
+
+        ; Aliases
+        objc_msg_lookup_stret = objc_msg_lookup
+        objc_msg_lookup_super_stret = objc_msg_lookup_super
+
+        ; Property Manipulation (Compiler Contract)
+        objc_copyPropertyStruct
+        objc_getProperty
+        objc_getPropertyStruct
+        objc_setProperty
+        objc_setProperty_atomic
+        objc_setProperty_atomic_copy
+        objc_setProperty_nonatomic
+        objc_setProperty_nonatomic_copy
+        objc_setPropertyStruct
+        objc_copyCppObjectAtomic
+        objc_getCppObjectAtomic
+        objc_setCppObjectAtomic
+
+        ; Obj-C Runtime Methods (API Surface)
+        class_addIvar
+        class_addMethod
+        class_addProperty
+        class_addProtocol
+        class_conformsToProtocol
+        class_copyIvarList
+        class_copyMethodList
+        class_copyPropertyList
+        class_copyProtocolList
+        class_createInstance
+        class_getClassMethod
+        class_getClassVariable
+        class_getInstanceMethod
+        class_getInstanceSize
+        class_getInstanceVariable
+        class_getIvarLayout
+        class_getMethodImplementation
+        class_getMethodImplementation_stret
+        class_getName
+        class_getProperty
+        class_getSuperclass
+        class_getVersion
+        class_getWeakIvarLayout
+        class_isMetaClass
+        class_pose_as
+        class_registerAlias_np
+        class_replaceMethod
+        class_replaceProperty
+        class_respondsToSelector
+        class_setIvarLayout
+        class_setSuperclass
+        class_setVersion
+        class_setWeakIvarLayout
+        imp_getBlock
+        imp_implementationWithBlock
+        imp_removeBlock
+        ivar_getName
+        ivar_getOffset
+        ivar_getTypeEncoding
+        method_copyArgumentType
+        method_copyReturnType
+        method_exchangeImplementations
+        method_getArgumentType
+        method_getImplementation
+        method_getName
+        method_getNumberOfArguments
+        method_getReturnType
+        method_getTypeEncoding
+        method_setImplementation
+        objc_allocateClassPair
+        objc_allocateProtocol
+        objc_copyClassList
+        objc_copyProtocolList
+        objc_delete_weak_refs
+        objc_destroyWeak
+        objc_disposeClassPair
+        objc_enumerationMutation
+        objc_exception_throw
+        objc_exception_rethrow
+        objc_get_class
+        objc_get_meta_class
+        objc_getAssociatedObject
+        objc_getClass
+        objc_getClassList
+        objc_getMetaClass
+        objc_getProtocol
+        objc_getRequiredClass
+        objc_lookup_class
+        objc_lookUpClass
+        objc_registerClassPair
+        objc_registerProtocol
+        objc_registerSmallObjectClass_np
+        objc_removeAssociatedObjects
+        objc_setAssociatedObject
+        objc_sync_enter
+        objc_sync_exit
+        object_addMethod_np
+        object_clone_np
+        object_dispose
+        object_getClass
+        object_getClassName
+        object_getIndexedIvars
+        object_getInstanceVariable
+        object_getIvar
+        object_getPrototype_np
+        object_replaceMethod_np
+        object_setClass
+        object_setInstanceVariable
+        object_setIvar
+        property_copyAttributeList
+        property_copyAttributeValue
+        property_getAttributes
+        property_getName
+        protocol_addMethodDescription
+        protocol_addProperty
+        protocol_addProtocol
+        protocol_conformsToProtocol
+        protocol_copyMethodDescriptionList
+        protocol_copyPropertyList
+        protocol_copyProtocolList
+        protocol_getMethodDescription
+        protocol_getName
+        protocol_getProperty
+        protocol_isEqual
+        sel_copyTypedSelectors_np
+        sel_copyTypes_np
+        sel_getName
+        sel_getType_np
+        sel_getUid
+        sel_isEqual
+        sel_registerName
+        sel_registerTypedName_np
