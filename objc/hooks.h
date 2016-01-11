@@ -102,4 +102,7 @@ typedef IMP (*objc_tracing_hook)(id, SEL, IMP, int, void*);
  */
 int objc_registerTracingHook(SEL, objc_tracing_hook);
 
-
+/**
+ * Hook called when a collection is mutated while it is being enumerated.
+ */
+OBJC_HOOK void(*_objc_enumeration_mutation)(id object);
