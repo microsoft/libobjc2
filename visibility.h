@@ -20,5 +20,12 @@
 #	define ASSERT(x) do { if (x) __builtin_unreachable(); } while(0)
 #endif
 
+#if defined _WIN32 && defined __clang__
+#define LIKELY(x) x
+#define UNLIKELY(x) x
+#define WEAK_EXPORT
+#else
 #define LIKELY(x) __builtin_expect(x, 1)
 #define UNLIKELY(x) __builtin_expect(x, 0)
+#define WEAK_EXPORT __attribute__((weak))
+#endif
