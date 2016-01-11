@@ -127,7 +127,11 @@ typedef signed char BOOL;
 #		ifdef __vxwords
 typedef  int BOOL;
 #		else
+#           if defined(_WIN32) && !defined(__MINGW32__) && !defined(__CYGWIN__)
+typedef int BOOL;
+#           else
 typedef unsigned char BOOL;
+#           endif
 #		endif
 #	endif
 
