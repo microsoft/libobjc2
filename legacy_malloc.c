@@ -14,7 +14,7 @@ void *objc_atomic_malloc(size_t size)
 	return malloc(size);
 }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_WINDOWS)
 void *objc_valloc(size_t size)
 {
 	return malloc(size);
