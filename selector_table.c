@@ -217,7 +217,7 @@ static inline uint32_t hash_selector(const void *s)
 	{
 		hash = hash * 33 + c;
 	}
-#ifdef TYPE_DEPENDENT_DISPATCH
+#if defined(TYPE_DEPENDENT_DISPATCH) || defined(WINOBJC_HASH_SELECTOR_TYPES)
 	// We can't use all of the values in the type encoding for the hash,
 	// because our equality test is a bit more complex than simple string
 	// encoding (for example, * and ^C have to be considered equivalent, since

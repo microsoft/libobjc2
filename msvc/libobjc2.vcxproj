@@ -51,8 +51,8 @@
     <UseStarboardSourceSdk>true</UseStarboardSourceSdk>
     <StarboardLinkObjCRuntime>false</StarboardLinkObjCRuntime>
     <WINOBJC_SDK_ROOT Condition="'$(WINOBJC_SDK_ROOT)' == ''">..\..\..\..</WINOBJC_SDK_ROOT>
-    <InvariantClangOptions>-DWIN32 -D_WINDOWS -DNO_PTHREADS=1 -DGNUSTEP -D__OBJC_RUNTIME_INTERNAL__=1 -DNO_LEGACY</InvariantClangOptions>
-    <InvariantPreprocessorDefinitions>WIN32;_WINDOWS;UNICODE;_UNICODE;NO_PTHREADS=1;GNUSTEP;__OBJC_RUNTIME_INTERNAL__=1;NO_LEGACY</InvariantPreprocessorDefinitions>
+    <InvariantClangOptions>-DWIN32 -D_WINDOWS -DNO_PTHREADS=1 -DGNUSTEP -D__OBJC_RUNTIME_INTERNAL__=1 -DNO_LEGACY -DWINOBJC_HASH_SELECTOR_TYPES</InvariantClangOptions>
+    <InvariantPreprocessorDefinitions>WIN32;_WINDOWS;UNICODE;_UNICODE;NO_PTHREADS=1;GNUSTEP;__OBJC_RUNTIME_INTERNAL__=1;NO_LEGACY;WINOBJC_HASH_SELECTOR_TYPES</InvariantPreprocessorDefinitions>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
