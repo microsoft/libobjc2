@@ -31,20 +31,38 @@ extern "C" Class object_getClass(id);
 extern "C" Class class_getSuperclass(Class);
 extern "C" const char* class_getName(Class);
 
-typedef struct {
+struct __ObjC_CatchableType {
     unsigned int flags;
-    const char* type;
-    int nonVirtualAdjustment;
-    int vbPtrOffset;
-    int vTableIndex;
+    _TypeDescriptor* type;
+    int mdisp;
+    int pdisp;
+    int vdisp;
     int size;
     void* copyFunction;
-} __ObjC_CatchableType;
+};
 
-typedef struct {
+struct __ObjC_CatchableTypeArray {
     int count;
     __ObjC_CatchableType* types[0];
-} __ObjC_CatchableTypeArray;
+};
+
+namespace {
+
+    std::string mangleClassName(Class cls) {
+        // TODO - this name mangling correctly:
+        return std::string(".PAAU") + class_getName(cls) + "@@";
+    }
+
+    void fillCatchableType(__ObjC_CatchableType* exceptType) {
+        exceptType->flags = 1;
+        exceptType->mdisp = 0;
+        exceptType->pdisp = -1;
+        exceptType->vdisp = 0;
+        exceptType->size = 4;
+        exceptType->copyFunction = nullptr;
+    }
+
+}
 
 /**
  * Throws an Objective-C exception.  This function is, unfortunately, used for
@@ -65,26 +83,46 @@ extern "C" void objc_exception_throw(id object) {
 
     DEBUG_LOG("Throwing %p\n", object);
 
-    std::vector<__ObjC_CatchableType*> _catchableTypes;
-    Class curType = object_getClass(object);
-    while (curType) {
-        _catchableTypes.push_back(new __ObjC_CatchableType{
-            1, class_getName(curType), 0, -1, 0, sizeof(Class)
-        });
-        curType = class_getSuperclass(curType);
-    }
-    _catchableTypes.push_back(new __ObjC_CatchableType{
-        1, "id", 0, -1, 0, sizeof(Class)
-    });
+    // The 'id' base type will be taking up a spot in the list:
+    size_t typeCount = 1;
 
-    __ObjC_CatchableTypeArray* exceptTypes = (__ObjC_CatchableTypeArray*)calloc(sizeof(int) + sizeof(__ObjC_CatchableType) * _catchableTypes.size(), 1);
-    exceptTypes->count = _catchableTypes.size();
-    memcpy(&exceptTypes->types[0], _catchableTypes.data(), _catchableTypes.size() * sizeof(__ObjC_CatchableType*));
+    // Get count of all types in exception
+    for (Class curType = object_getClass(object); curType != nil; curType = class_getSuperclass(curType), ++typeCount) {
+    }
+
+    // The internal EH percolation assumes this is the vtable:
+    const void* vtable = *(void**)&typeid(void *);
+
+    // Unfortunately we can't put this in a real function since the alloca has to be in this stack frame:
+#define CREATE_TYPE_DESCRIPTOR(desc, symName) \
+    desc = reinterpret_cast<_TypeDescriptor*>(alloca(sizeof(_TypeDescriptor) + symName.size() + 1 /* null terminator */)); \
+    desc->pVFTable = vtable; \
+    desc->spare = nullptr; \
+    strcpy_s(desc->name, symName.size() + 1, symName.c_str());
+
+    auto exceptTypes =
+        (__ObjC_CatchableTypeArray*)_alloca(sizeof(__ObjC_CatchableTypeArray) + sizeof(__ObjC_CatchableType*) * typeCount);
+    exceptTypes->count = typeCount;
+
+    //  Add exception type and all base types to throw information
+    size_t curTypeIndex = 0;
+    for (Class curType = object_getClass(object); curType != nil; curType = class_getSuperclass(curType)) {
+        auto exceptType = exceptTypes->types[curTypeIndex++] = (__ObjC_CatchableType*)_alloca(sizeof(__ObjC_CatchableType));
+        fillCatchableType(exceptType);
+
+        auto mangledName = mangleClassName(curType);
+        CREATE_TYPE_DESCRIPTOR(exceptType->type, mangledName);
+    }
+
+    //  Add id
+    auto exceptType = exceptTypes->types[curTypeIndex] = (__ObjC_CatchableType*)_alloca(sizeof(__ObjC_CatchableType));
+    fillCatchableType(exceptType);
+    CREATE_TYPE_DESCRIPTOR(exceptType->type, std::string("PAAAPAUobjc_object@@"));
 
     _ThrowInfo ti = { 0, NULL, NULL, (_CatchableTypeArray*)exceptTypes };
 
     _CxxThrowException(&object, &ti);
 
     DEBUG_LOG("Throw returned!\n");
-	abort();
+    abort();
 }
