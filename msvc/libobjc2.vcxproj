@@ -117,10 +117,19 @@
     <ClangCompile Include="..\NSBlocks.m" />
     <ClangCompile Include="..\properties.m" />
     <ClangCompile Include="..\Protocol2.m" />
-    <ClCompile Include="objc_msgSend.x86-32.masm.cpp" />
+    <ClCompile Include="objc_msgSend.x86-32.masm.cpp">
+      <ExcludedFromBuild Condition="'$(Platform)'!='Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="objc_msgSend.arm.asm">
+      <PreprocessToFile>true</PreprocessToFile>
+      <ExcludedFromBuild Condition="'$(Platform)'!='ARM'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="eh_winobjc.cc" />
     <ClangCompile Include="block_to_imp_winobjc.c" />
   </ItemGroup>
+  <Target Name="ARMAssembly" Condition="'$(Platform)'=='ARM'" AfterTargets="ClCompile">
+    <Exec Command="armasm.exe &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.i&quot; -o &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj&quot;" Outputs="$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(WINOBJC_SDK_ROOT)\msvc\starboard.props" />
@@ -198,7 +207,7 @@
                  linking against a win10 api set in stead of kernel32.lib.  This ends up breaking the unit tests on the build server
                  which is server 2012 R2 (win 8.1).
       -->
-      <AdditionalDependencies>vccorlibd.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlibd.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <AdditionalLibraryDirectories>$(StarboardLibDirs);$(StarboardPrebuiltLibsDir)</AdditionalLibraryDirectories>
@@ -223,7 +232,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vccorlib.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlib.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
     </Link>
@@ -247,7 +256,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vccorlibd.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlibd.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
     </Link>
@@ -271,7 +280,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vccorlib.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlib.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
     </Link>
@@ -295,7 +304,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vccorlibd.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlibd.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
     </Link>
@@ -319,7 +328,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vccorlib.lib;kernel32.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
+      <AdditionalDependencies>vccorlib.lib;mincore.lib;%(AdditionalDependencies);RuntimeObject.lib</AdditionalDependencies>
       <ModuleDefinitionFile>libobjc2.def</ModuleDefinitionFile>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
     </Link>
