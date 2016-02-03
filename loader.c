@@ -77,10 +77,6 @@ void __objc_load_module(struct objc_module_abi_8 *module)
 		init_arc();
 		init_trampolines();
 		first_run = NO;
-		if (getenv("LIBOBJC_MEMORY_PROFILE"))
-		{
-			atexit(log_memory_stats);
-		}
 		if (dispatch_begin_thread_4GC != 0) {
 			dispatch_begin_thread_4GC = objc_registerThreadWithCollector;
 		}
