@@ -128,7 +128,7 @@
     <ClangCompile Include="block_to_imp_winobjc.c" />
   </ItemGroup>
   <Target Name="ARMAssembly" Condition="'$(Platform)'=='ARM'" AfterTargets="ClCompile">
-    <Exec Command="armasm.exe &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.i&quot; -o &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj&quot;" Outputs="$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj" />
+    <Exec Command="armasm.exe &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.i&quot; -g -o &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj&quot;" Outputs="$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj" />
   </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
