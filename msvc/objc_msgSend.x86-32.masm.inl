@@ -44,7 +44,7 @@ doubleDereferencedGlobalBlock:
         mov         ecx, [ecx]
 
         // (shift = dtable size - 8bit, 16bit, 32bit)
-        mov         edx, [eax] dtable_t.shift
+        mov         edx, [eax] SparseArray.shift
 
         cmp         edx, 8
         je          dtable16
@@ -55,13 +55,13 @@ doubleDereferencedGlobalBlock:
         mov         edx, ecx
         shr         edx, 10h
         // 4* here for sizeof(void)
-        mov         eax, [eax] dtable_t.data[4*edx]
+        mov         eax, [eax] SparseArray.data[4*edx]
 dtable16:   // dtable is 16-bit - its entries point to 8-bit dtables
         movzx       edx, ch
-        mov         eax, [eax] dtable_t.data[4*edx]
+        mov         eax, [eax] SparseArray.data[4*edx]
 dtable8:    // dtable is 8-bit - its entries point to objc_slots
         movzx       edx, cl
-        mov         eax, [eax] dtable_t.data[4*edx]
+        mov         eax, [eax] SparseArray.data[4*edx]
 
         // Did we get a nil method? If so, slow send (forwarding)
         test        eax, eax
