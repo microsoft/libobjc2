@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "../sarray2.h"
+#include "debug_constants.h"
 
 #define SMALLOBJ_MASK 1
 #define OBJECT_STACK_OFFSET 4
@@ -53,12 +54,14 @@ extern "C" struct objc_class* SmallObjectClasses[];
 extern "C" IMP slowMsgLookup();
 extern "C" struct objc_class _NSConcreteGlobalBlock;
 
+#line DBG_SKIP
 extern "C" __declspec(naked) void* objc_msgSend(struct objc_class* self, void* _cmd) {
 #define OBJECT_STACK_OFFSET 4
 #define SELECTOR_STACK_OFFSET 8
 #include "objc_msgSend.x86-32.masm.inl"
 }
 
+#line DBG_SKIP
 extern "C" __declspec(naked) double objc_msgSend_fpret(struct objc_class* self, void* _cmd) {
 #define OBJECT_STACK_OFFSET 4
 #define SELECTOR_STACK_OFFSET 8
@@ -66,6 +69,7 @@ extern "C" __declspec(naked) double objc_msgSend_fpret(struct objc_class* self, 
 #include "objc_msgSend.x86-32.masm.inl"
 }
 
+#line DBG_SKIP
 extern "C" __declspec(naked) void* objc_msgSend_stret(void* stret, struct objc_class* self, void* _cmd) {
 #define OBJECT_STACK_OFFSET 8
 #define SELECTOR_STACK_OFFSET 12
