@@ -212,6 +212,7 @@
       <PreprocessorDefinitions>NDEBUG;$(InvariantPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SystemHeaderDeps>true</SystemHeaderDeps>
       <IncludePaths>$(WINOBJC_SDK_ROOT)\Frameworks\include</IncludePaths>
+      <OptimizationLevel>Full</OptimizationLevel>
     </ClangCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm'">
@@ -260,6 +261,7 @@
       <PreprocessorDefinitions>NDEBUG;$(InvariantPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SystemHeaderDeps>true</SystemHeaderDeps>
       <IncludePaths>$(WINOBJC_SDK_ROOT)\Frameworks\include</IncludePaths>
+      <OptimizationLevel>Full</OptimizationLevel>
     </ClangCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
