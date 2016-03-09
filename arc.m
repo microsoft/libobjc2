@@ -13,8 +13,33 @@
 
 #ifndef NO_PTHREADS
 #include <pthread.h>
-pthread_key_t ARCThreadKey;
+typedef pthread_key_t arc_tls_key_t;
+#define arc_tls_store pthread_setspecific
+#define arc_tls_load pthread_getspecific
+#define TLS_CALLBACK(name) void name
+
+static inline pthread_key_t arc_tls_key_create(void(*cleanupFunction)(void*)) {
+	pthread_key_t key;
+	pthread_key_create(&key, cleanupFunction);
+	return key;
+}
+#else // if defined(NO_PTHREADS)
+// We're using the Fiber-Local Storage APIs on Windows
+// because the TLS APIs won't pass app certification.
+// Additionally, the FLS API surface is 1:1 mapped to
+// the TLS API surface when fibers are not in use.
+#include <Windows.h>
+typedef DWORD arc_tls_key_t;
+#define arc_tls_store FlsSetValue
+#define arc_tls_load FlsGetValue
+#define TLS_CALLBACK(name) void WINAPI name
+
+static inline DWORD arc_tls_key_create(void WINAPI(*cleanupFunction)(void*)) {
+	return FlsAlloc(cleanupFunction);
+}
 #endif
+
+arc_tls_key_t ARCThreadKey;
 
 extern void _NSConcreteMallocBlock;
 extern void _NSConcreteStackBlock;
@@ -57,20 +82,15 @@ struct arc_tls
 	id returnRetained;
 };
 
-static __thread struct arc_tls _arcTls;
 static inline struct arc_tls* getARCThreadData(void)
 {
-#ifdef NO_PTHREADS
-	return &_arcTls;
-#else
-	struct arc_tls *tls = pthread_getspecific(ARCThreadKey);
+	struct arc_tls *tls = arc_tls_load(ARCThreadKey);
 	if (NULL == tls)
 	{
 		tls = calloc(sizeof(struct arc_tls), 1);
-		pthread_setspecific(ARCThreadKey, tls);
+		arc_tls_store(ARCThreadKey, tls);
 	}
 	return tls;
-#endif
 }
 int count = 0;
 int poolCount = 0;
@@ -133,7 +153,7 @@ static void emptyPool(struct arc_tls *tls, id *stop)
 	//fprintf(stderr, "New insert: %p.  Stop: %p\n", tls->pool->insert, stop);
 }
 
-static void cleanupPools(struct arc_tls* tls)
+static TLS_CALLBACK(cleanupPools)(struct arc_tls* tls)
 {
 	if (tls->returnRetained)
 	{
@@ -523,9 +543,7 @@ PRIVATE void init_arc(void)
 {
 	weak_ref_initialize(&weakRefs, 128);
 	INIT_LOCK(weakRefLock);
-#ifndef NO_PTHREADS
-	pthread_key_create(&ARCThreadKey, (void(*)(void*))cleanupPools);
-#endif
+	ARCThreadKey = arc_tls_key_create((void(*)(void*))cleanupPools);
 }
 
 void* block_load_weak(void *block);
