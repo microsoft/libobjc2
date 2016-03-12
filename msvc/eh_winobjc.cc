@@ -117,7 +117,7 @@ extern "C" void objc_exception_throw(id object) {
     //  Add id
     auto exceptType = exceptTypes->types[curTypeIndex] = (__ObjC_CatchableType*)_alloca(sizeof(__ObjC_CatchableType));
     fillCatchableType(exceptType);
-    CREATE_TYPE_DESCRIPTOR(exceptType->type, std::string("PAAAPAUobjc_object@@"));
+    CREATE_TYPE_DESCRIPTOR(exceptType->type, std::string(".PAAAPAUobjc_object@@"));
 
     _ThrowInfo ti = { 0, NULL, NULL, (_CatchableTypeArray*)exceptTypes };
 
