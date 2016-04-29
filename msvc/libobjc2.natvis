@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Version Name="libobjc2.dll"/>
+  <Type Name="objc_class">
+    <DisplayString>Class: {name,s8b}</DisplayString>
+    <Expand>
+      <Item Name="isa">isa</Item>
+      <Item Name="super_class">super_class</Item>
+      <Item Name="name">name</Item>
+      <Item Name="version">version</Item>
+      <Item Name="info">(objc_class_flags)info</Item>
+      <Item Name="instance_size">instance_size</Item>
+      <Item Name="ivars">ivars</Item>
+      <Item Name="methods">methods</Item>
+      <Item Name="protocols">protocols</Item>
+      <Item Name="abi_version">abi_version</Item>
+      <Item Name="properties">properties</Item>
+    </Expand>
+  </Type>
+  <Type Name="objc_ivar_list">
+    <Expand>
+      <ArrayItems>
+        <Size>count</Size>
+        <ValuePointer>ivar_list</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="objc_ivar">
+    <DisplayString>ivar: {name,s8b}</DisplayString>
+  </Type>
+  <Type Name="objc_method_list">
+    <Expand>
+      <CustomListItems>
+        <Variable Name="list" InitialValue="this"/>
+        <Variable Name="i" InitialValue="0" />
+        <Loop Condition="list != nullptr">
+          <Loop Condition="i &lt; list-&gt;count">
+            <Item>list-&gt;methods[i]</Item>
+            <Exec>++i</Exec>
+          </Loop>
+          <Exec>list = list-&gt;next</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  <Type Name="objc_property_list">
+    <Expand>
+      <CustomListItems>
+        <Variable Name="list" InitialValue="this"/>
+        <Variable Name="i" InitialValue="0" />
+        <Loop Condition="list != nullptr">
+          <Loop Condition="i &lt; list-&gt;count">
+            <Item>list-&gt;properties[i]</Item>
+            <Exec>++i</Exec>
+          </Loop>
+          <Exec>list = list-&gt;next</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  <Type Name="objc_property">
+    <Expand>
+      <Item Name="name">name</Item>
+      <Item Name="attributes">(PropertyAttributeKind)attributes,en</Item>
+      <Item Name="[Synthesized]">((PropertyAttributeKind2)attributes2 &amp; PropertyAttributeKind2::OBJC_PR_synthesized) != 0</Item>
+      <Item Name="getter_name">getter_name</Item>
+      <Item Name="getter_types">getter_types</Item>
+      <Item Name="setter_name">setter_name</Item>
+      <Item Name="setter_types">setter_types</Item>
+    </Expand>
+  </Type>
+  
+  <Type Name="objc_protocol_list">
+    <Expand>
+      <CustomListItems>
+        <Variable Name="list" InitialValue="this"/>
+        <Variable Name="i" InitialValue="0" />
+        <Loop Condition="list != nullptr">
+          <Loop Condition="i &lt; list-&gt;count">
+            <Item>list-&gt;list[i]</Item>
+            <Exec>++i</Exec>
+          </Loop>
+          <Exec>list = list-&gt;next</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  <Type Name="objc_protocol2">
+    <DisplayString>Protocol : {name,s8b}</DisplayString>
+  </Type>
+  <Type Name="objc_method">
+    <DisplayString>{selector,na}, types: {types,s8b}, imp: {imp}</DisplayString>
+  </Type>
+  <Type Name="objc_method_description_list">
+    <Expand>
+      <ArrayItems>
+        <Size>count</Size>
+        <ValuePointer>methods</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="class_table_internal_table_struct">
+    <DisplayString>{{Class table}}</DisplayString>
+    <Expand>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0" />
+        <Loop Condition="i &lt; table_size">
+          <Item Condition="table[i].value != nullptr">*((objc_class*)table[i].value)</Item>
+          <Exec>++i</Exec>
+        </Loop>
+      </CustomListItems>
+      <Synthetic Name="[Raw table view]">
+        <Expand>
+          <ArrayItems>
+            <Size>table_size</Size>
+            <ValuePointer>table</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+</AutoVisualizer>

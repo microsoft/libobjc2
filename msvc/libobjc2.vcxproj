@@ -114,6 +114,7 @@
     </ClCompile>
     <ClCompile Include="eh_winobjc.cc" />
     <ClangCompile Include="block_to_imp_winobjc.c" />
+    <Natvis Include="libobjc2.natvis" />
   </ItemGroup>
   <Target Name="ARMAssembly" Condition="'$(Platform)'=='ARM'" AfterTargets="ClCompile">
     <Exec Command="armasm.exe &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.i&quot; -g -o &quot;$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj&quot;" Outputs="$(SolutionDir)$(Platform)\$(Configuration)\objc_msgSend.arm.obj" />
