@@ -50,7 +50,7 @@
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
     <UseStarboardSourceSdk>true</UseStarboardSourceSdk>
     <StarboardLinkObjCRuntime>false</StarboardLinkObjCRuntime>
-    <WINOBJC_SDK_ROOT Condition="'$(WINOBJC_SDK_ROOT)' == ''">../../WinObjC</WINOBJC_SDK_ROOT>
+    <WINOBJC_SDK_ROOT Condition="'$(WINOBJC_SDK_ROOT)' == ''">..\..\..\..</WINOBJC_SDK_ROOT>
     <InvariantClangOptions>-DWIN32 -D_WINDOWS -DNO_PTHREADS=1 -DGNUSTEP -D__OBJC_RUNTIME_INTERNAL__=1 -DNO_LEGACY -DWINOBJC_HASH_SELECTOR_TYPES</InvariantClangOptions>
     <InvariantPreprocessorDefinitions>WIN32;_WINDOWS;UNICODE;_UNICODE;NO_PTHREADS=1;GNUSTEP;__OBJC_RUNTIME_INTERNAL__=1;NO_LEGACY;WINOBJC_HASH_SELECTOR_TYPES</InvariantPreprocessorDefinitions>
   </PropertyGroup>
@@ -269,4 +269,15 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(WINOBJC_SDK_ROOT)\msvc\sbclang.targets" />
   </ImportGroup>
+  <PropertyGroup>
+    <PrebuiltPath Condition="'$(PrebuiltPath)' == ''">$(WINOBJC_SDK_ROOT)\deps\prebuilt\Universal Windows\$(PlatformTarget)\$(Configuration)\\</PrebuiltPath>
+  </PropertyGroup>
+  <Target Name="CopyContent" AfterTargets="Build">
+    <ItemGroup>
+      <LibraryOutput Include="$(OutDir)\*.lib" />
+      <LibraryOutput Include="$(OutDir)\*.dll" />
+      <LibraryOutput Include="$(OutDir)\*.pdb" />
+    </ItemGroup>
+    <Copy DestinationFolder="$(PrebuiltPath)" SkipUnchangedFiles="True" SourceFiles="@(LibraryOutput)" />
+  </Target>
 </Project>
