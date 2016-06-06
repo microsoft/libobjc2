@@ -20,6 +20,11 @@ LIBRARY libobjc2
         ; Loader (Compiler Contract)
         __objc_exec_class
 
+        ; Loader v2
+        __objc_load_module
+        __objc_resolve_module
+        __objc_resolve_legacy_modules
+
         ; Block methods
         _Block_copy
         _Block_object_assign

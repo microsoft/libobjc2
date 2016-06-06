@@ -43,8 +43,7 @@ __attribute__((weak)) void (*dispatch_end_thread_4GC)(void);
 __attribute__((weak)) void *(*_dispatch_begin_NSAutoReleasePool)(void);
 __attribute__((weak)) void (*_dispatch_end_NSAutoReleasePool)(void *);
 
-void __objc_exec_class(struct objc_module_abi_8 *module)
-{
+void __objc_load_module(struct objc_module_abi_8 *module) {
 	static BOOL first_run = YES;
 
 	// Check that this module uses an ABI version that we recognise.  
@@ -109,7 +108,6 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 	{
 		objc_load_class(symbols->definitions[defs++]);
 	}
-	unsigned int category_start = defs;
 	// Load the categories from this module
 	for (unsigned short i=0 ; i<symbols->category_count; i++)
 	{
@@ -125,17 +123,74 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 	// Load categories and statics that were deferred.
 	objc_load_buffered_categories();
 	objc_init_buffered_statics();
+}
+
+void __objc_resolve_module(struct objc_module_abi_8 *module)
+{
+	LOCK_RUNTIME_FOR_SCOPE();
 	// Fix up the class links for loaded classes.
 	objc_resolve_class_links();
-	for (unsigned short i=0 ; i<symbols->category_count; i++)
-	{
-		struct objc_category *cat = (struct objc_category*)
-			symbols->definitions[category_start++];
-		Class class = (Class)objc_getClass(cat->class_name);
-		if ((Nil != class) && 
-		    objc_test_class_flag(class, objc_class_flag_resolved))
+	if (NULL != module) {
+		struct objc_symbol_table_abi_8 *symbols = module->symbol_table;
+		unsigned int category_start = symbols->class_count;
+
+		for (unsigned short i=0 ; i<symbols->category_count; i++)
 		{
-			objc_send_load_message(class);
+			struct objc_category *cat = (struct objc_category*)
+				symbols->definitions[category_start++];
+			Class class = (Class)objc_getClass(cat->class_name);
+			if ((Nil != class) && 
+				objc_test_class_flag(class, objc_class_flag_resolved))
+			{
+				objc_send_load_message(class);
+			}
 		}
 	}
+}
+
+
+#ifdef WINOBJC
+// WinObjC breaks loading into two deterministic stages: class registration
+// and class resolution. The original GNUstep ABI as implemented in Clang
+// emits calls to __objc_exec_class into the user static init section,
+// interleaving them with other static initializers and subjecting them to
+// static initialization ordering issues. +load can therefore be called on one class
+// when another class's module hasn't even been registered.
+// The WinObjC ABI preferentially emits objc_module_abi_8*s into a binary section
+// that's then registered and resolved (in that order) once on load.
+//
+// For backwards compatibility, however, it must support __objc_exec_class-based registration.
+// To do so, this code batches all executed modules into a linked list for future resolution.
+// This ensures that +load is only called after all referenced classes have completed
+// registration and dtable installation.
+static struct objc_module_abi_8 *legacy_module_head;
+
+static void __objc_push_legacy_module(struct objc_module_abi_8 *module) {
+	LOCK_RUNTIME_FOR_SCOPE();
+
+	// repurpose module->name for an intrusive linked list; this is just like
+	// unresolved_class_{next,prev} in class_table.c
+	module->name = (char*)legacy_module_head;
+	legacy_module_head = module;
+}
+
+void __objc_resolve_legacy_modules(void) {
+	LOCK_RUNTIME_FOR_SCOPE();
+	struct objc_module_abi_8 *module = legacy_module_head;
+	legacy_module_head = NULL;
+	for(; module; module = (struct objc_module_abi_8 *)module->name) {
+		__objc_resolve_module(module);
+	}
+}
+#endif
+
+void __objc_exec_class(struct objc_module_abi_8 *module)
+{
+	__objc_load_module(module);
+
+#ifdef WINOBJC
+	__objc_push_legacy_module(module);
+#else
+	__objc_resolve_module(module);
+#endif
 }
