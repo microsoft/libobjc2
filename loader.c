@@ -43,7 +43,7 @@ __attribute__((weak)) void (*dispatch_end_thread_4GC)(void);
 __attribute__((weak)) void *(*_dispatch_begin_NSAutoReleasePool)(void);
 __attribute__((weak)) void (*_dispatch_end_NSAutoReleasePool)(void *);
 
-void __objc_exec_class(struct objc_module_abi_8 *module)
+void __objc_load_module(struct objc_module_abi_8 *module)
 {
 	static BOOL first_run = YES;
 
@@ -113,7 +113,6 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 	{
 		objc_load_class(symbols->definitions[defs++]);
 	}
-	unsigned int category_start = defs;
 	// Load the categories from this module
 	for (unsigned short i=0 ; i<symbols->category_count; i++)
 	{
@@ -129,17 +128,63 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 	// Load categories and statics that were deferred.
 	objc_load_buffered_categories();
 	objc_init_buffered_statics();
+}
+
+void __objc_resolve_module(struct objc_module_abi_8 *module)
+{
+	LOCK_RUNTIME_FOR_SCOPE();
 	// Fix up the class links for loaded classes.
 	objc_resolve_class_links();
-	for (unsigned short i=0 ; i<symbols->category_count; i++)
+	if (NULL != module)
 	{
-		struct objc_category *cat = (struct objc_category*)
-			symbols->definitions[category_start++];
-		Class class = (Class)objc_getClass(cat->class_name);
-		if ((Nil != class) && 
-		    objc_test_class_flag(class, objc_class_flag_resolved))
+		struct objc_symbol_table_abi_8 *symbols = module->symbol_table;
+		unsigned int category_start = symbols->class_count;
+
+		for (unsigned short i=0 ; i<symbols->category_count; i++)
 		{
-			objc_send_load_message(class);
+			struct objc_category *cat = (struct objc_category*)
+				symbols->definitions[category_start++];
+			Class class = (Class)objc_getClass(cat->class_name);
+			if ((Nil != class) && 
+				objc_test_class_flag(class, objc_class_flag_resolved))
+			{
+				objc_send_load_message(class);
+			}
 		}
 	}
+}
+
+
+// Modern initialization breaks loading into two deterministic phases: class
+// registration and class resolution. The original GNUstep ABI implemented in Clang
+// emits calls to __objc_exec_class into the user static init area,
+// interleaving them with other static initializers and subjecting them to
+// the static init order fiasco. +load can therefore be called on one class
+// when another class's module hasn't been registered.
+//
+// On PE/COFF platforms, -fobjc-runtime=microsoft instructs Clang to emit
+// objc_module_abi_xxx pointers into a section in the binary. The boundaries of
+// that section are passed to __objc_load_modules by a linkonce/selectany
+// module initializer emitted into each object file.
+// This lets us load classes, categories and selectors from all of the modules
+// in a loaded image before calling +load on any of them.
+PUBLIC void __objc_load_modules(struct objc_module_abi_8 **start, struct objc_module_abi_8 **end)
+{
+	for(struct objc_module_abi_8 **p = start; p < end; ++p)
+	{
+		if (*p)
+			__objc_load_module(*p);
+	}
+
+	for(struct objc_module_abi_8 **p = start; p < end; ++p)
+	{
+		if (*p)
+			__objc_resolve_module(*p);
+	}
+}
+
+PUBLIC void __objc_exec_class(struct objc_module_abi_8 *module)
+{
+	__objc_load_module(module);
+	__objc_resolve_module(module);
 }
