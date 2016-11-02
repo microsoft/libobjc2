@@ -34,6 +34,7 @@ LIBRARY libobjc2
         block_getType_np
 
         ; Type Encoding
+        objc_aligned_size
         objc_sizeof_type
         objc_alignof_type
         objc_skip_typespec
