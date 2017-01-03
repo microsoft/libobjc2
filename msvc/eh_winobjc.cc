@@ -16,7 +16,6 @@
 #define __builtin_unreachable abort
 #endif
 
-using BOOL = char;
 using id = void*;
 using Class = id;
 using SEL = char*;
@@ -27,6 +26,7 @@ using IMP = id(*)(id, SEL);
 extern "C" SEL sel_registerName(const char*);
 extern "C" bool class_respondsToSelector(Class, SEL);
 extern "C" IMP objc_msg_lookup(id, SEL);
+extern "C" id objc_msgSend(id, SEL, ...);
 extern "C" Class object_getClass(id);
 extern "C" Class class_getSuperclass(Class);
 extern "C" const char* class_getName(Class);
@@ -79,6 +79,13 @@ extern "C" void objc_exception_throw(id object) {
         rethrow(object, rethrow_sel);
         // Should not be reached!  If it is, then the rethrow method actually
         // didn't, so we throw it normally.
+    }
+
+    SEL processException_sel = sel_registerName("_processException");
+    if ((nil != object) &&
+        (class_respondsToSelector(object_getClass(object), processException_sel))) {
+        IMP processException = objc_msg_lookup(object, processException_sel);
+        processException(object, processException_sel);
     }
 
     DEBUG_LOG("Throwing %p\n", object);
