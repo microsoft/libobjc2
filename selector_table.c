@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdatomic.h>
 #include "lock.h"
 #include "objc/runtime.h"
 #include "method_list.h"
@@ -205,11 +206,11 @@ static int selector_equal(const void *k,
 }
 
 /**
- * Hash a selector.
+ * Calculate the hash for the selector. Should match with the implementation
+ * in the compiler.
  */
-static inline uint32_t hash_selector(const void *s)
+static inline uint32_t selector_create_hash(SEL sel)
 {
-	SEL sel = (SEL)s;
 	uint32_t hash = 5381;
 	const char *str = sel_getNameNonUnique(sel);
 	uint32_t c;
@@ -235,6 +236,28 @@ static inline uint32_t hash_selector(const void *s)
 		}
 	}
 #endif
+	return hash;
+}
+
+/**
+ * Hash a selector
+ */
+static inline uint32_t hash_selector(const void *s)
+{
+	struct objc_selector * sel = (struct objc_selector *)s;
+	uint32_t hash = atomic_load_explicit(&sel->hash, memory_order_relaxed);
+
+	if (hash == 0) {
+		// selectors can be created from methods or from older ABIs and
+		// won't have a hash yet. So calculate and cache it.
+		// Use atomic operations because this may not be happening
+		// under any lock.
+		hash = selector_create_hash(sel);
+		atomic_store_explicit(&sel->hash, hash, memory_order_relaxed);
+	}
+	else {
+		assert(hash == selector_create_hash(sel));
+	}
 	return hash;
 }
 
@@ -289,7 +312,7 @@ static SEL selector_lookup(const char *name, const char *types)
 }
 static inline void add_selector_to_table(SEL aSel, int32_t uid, uint32_t idx)
 {
-	DEBUG_LOG("Sel %s uid: %d, idx: %d, hash: %d\n", sel_getNameNonUnique(aSel), uid, idx, hash_selector(aSel));
+	DEBUG_LOG("Sel %s uid: %d, idx: %d, hash: %08x\n", sel_getNameNonUnique(aSel), uid, idx, aSel->hash);
 	struct sel_type_list *typeList =
 		(struct sel_type_list *)selector_pool_alloc();
 	typeList->value = aSel->name;
@@ -333,6 +356,7 @@ static inline void register_selector_locked(SEL aSel)
 		untyped = selector_pool_alloc();
 		untyped->name = aSel->name;
 		untyped->types = 0;
+		untyped->hash = 0;
 		DEBUG_LOG("Registering selector %d %s\n", (int)idx, sel_getNameNonUnique(aSel));
 		add_selector_to_table(untyped, idx, idx);
 		// If we are in type dependent dispatch mode, the uid for the typed
@@ -405,6 +429,7 @@ static SEL objc_register_selector_copy(SEL aSel, BOOL copyArgs)
 	copy = selector_pool_alloc();
 	copy->name = aSel->name;
 	copy->types = (NULL == aSel->types) ? NULL : aSel->types;
+	copy->hash = aSel->hash;
 	if (copyArgs)
 	{
 		SEL untyped = selector_lookup(aSel->name, 0);
@@ -608,6 +633,23 @@ PRIVATE void objc_register_selector_array(SEL selectors, unsigned long count)
 	for (unsigned long i=0 ;  (NULL != selectors[i].name) ; i++)
 	{
 		objc_register_selector(&selectors[i]);
+	}
+}
+PRIVATE void objc_register_selector_array8(struct objc_selector8 * selectors, unsigned long count)
+{
+	// GCC is broken and always sets the count to 0, so we ignore count until
+	// we can throw stupid and buggy compilers in the bin.
+	for (unsigned long i = 0; (NULL != selectors[i].name); i++)
+	{
+		SEL copy = selector_pool_alloc();
+		copy->name = selectors[i].name;
+		copy->types = selectors[i].types;
+		copy->hash = selector_create_hash(copy);
+		SEL registered = objc_register_selector(copy);
+
+		// the selector from the metadata needs to updated to the unique
+		// id instead of the name
+		selectors[i].name = registered->name;
 	}
 }
 

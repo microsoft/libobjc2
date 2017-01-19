@@ -98,8 +98,15 @@ void __objc_load_module(struct objc_module_abi_8 *module) {
 	// Register all of the selectors used in this module.
 	if (symbols->selectors)
 	{
-		objc_register_selector_array(symbols->selectors,
+		if (module->version < 11) {
+			// the module has the old selector format
+			objc_register_selector_array8(symbols->selectors,
 				symbols->selector_count);
+		}
+		else {
+			objc_register_selector_array(symbols->selectors,
+				symbols->selector_count);
+		}
 	}
 
 	unsigned short defs = 0;
