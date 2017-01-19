@@ -34,7 +34,8 @@ enum
 {
 	gcc_abi = 8,
 	gnustep_abi = 9,
-	gc_abi = 10
+	gc_abi = 10,
+	selhash_abi = 11,
 };
 
 /**
@@ -45,9 +46,11 @@ static struct objc_abi_version known_abis[] =
 	/* GCC ABI. */
 	{gcc_abi, gcc_abi, gnustep_abi, sizeof(struct objc_module_abi_8)},
 	/* Non-fragile ABI. */
-	{gnustep_abi, gcc_abi, gc_abi, sizeof(struct objc_module_abi_8)},
+	{gnustep_abi, gcc_abi, selhash_abi, sizeof(struct objc_module_abi_8)},
 	/* GC ABI.  Adds a field describing the GC mode. */
-	{gc_abi, gcc_abi, gc_abi, sizeof(struct objc_module_abi_10)}
+	{gc_abi, gcc_abi, selhash_abi, sizeof(struct objc_module_abi_10)},
+	/* ABI with hash in selector */
+	{selhash_abi, gcc_abi, selhash_abi, sizeof(struct objc_module_abi_11)}
 };
 
 static int known_abi_count =

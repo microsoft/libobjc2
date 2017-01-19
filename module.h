@@ -85,6 +85,19 @@ struct objc_module_abi_10
 	int gc_mode;
 };
 
+struct objc_module_abi_11
+{
+	/**
+	* Inherited fields from version 10 of the ABI.
+	*/
+	struct objc_module_abi_10 old;
+
+	/**
+	  * Flags for configuration of this module. Currently unused.
+	  */
+	uint32_t flags;
+};
+
 /**
  * List of static instances of a named class provided in this module.
  */

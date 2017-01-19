@@ -5,7 +5,7 @@
  * test to see whether a selector is polymorphic and allows enumeration of all
  * type encodings for a given selector.
  *
- * This is the same size as an objc_selector, so we can allocate them from the
+ * This is <= the size of an objc_selector, so we can allocate them from the
  * objc_selector pool.
  *
  * Note: For ABI v10, we can probably do something a bit more sensible here and
@@ -19,8 +19,9 @@ struct sel_type_list
 
 /**
  * Structure used to store selectors in the list.
+   This is the selctor from abi version 8.
  */
-struct objc_selector
+struct objc_selector8
 {
 	union
 	{
@@ -39,6 +40,36 @@ struct objc_selector
 	 * The Objective-C type encoding of the message identified by this selector.
 	 */
 	const char * types;
+};
+
+/**
+ * Structure used to store selectors in the list.
+ */
+struct objc_selector
+{
+	union
+	{
+		/**
+		* The name of this selector.  Used for unregistered selectors.
+		*/
+		const char *name;
+		/**
+		* The index of this selector in the selector table.  When a selector
+		* is registered with the runtime, its name is replaced by an index
+		* uniquely identifying this selector.  The index is used for dispatch.
+		*/
+		uintptr_t index;
+	};
+
+	/**
+	* The Objective-C type encoding of the message identified by this selector.
+	*/
+	const char * types;
+	
+	/**
+	 * Hash value for this selector (calculated from its name and type)
+	 */
+	_Atomic uint32_t hash;
 };
 
 /**
