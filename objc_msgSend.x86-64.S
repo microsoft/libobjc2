@@ -246,14 +246,25 @@
 	jmp   1b 
 	.cfi_endproc
 .endm
+
+#if !defined(_WIN32)
+#define REG_ARG0 %rdi
+#define REG_ARG1 %rsi
+#define REG_ARG2 %rdx
+#else
+#define REG_ARG0 %rcx
+#define REG_ARG1 %rdx
+#define REG_ARG2 %r8
+#endif
+
 .globl CDECL(objc_msgSend)
 TYPE_DIRECTIVE(CDECL(objc_msgSend), @function)
 .globl CDECL(objc_msgSend_fpret)
 TYPE_DIRECTIVE(CDECL(objc_msgSend_fpret), @function)
 CDECL(objc_msgSend_fpret):
 CDECL(objc_msgSend):
-	MSGSEND %rdi, %rsi
+	MSGSEND REG_ARG0, REG_ARG1
 .globl CDECL(objc_msgSend_stret)
 TYPE_DIRECTIVE(CDECL(objc_msgSend_stret), @function)
 CDECL(objc_msgSend_stret):
-	MSGSEND %rsi, %rdx
+	MSGSEND REG_ARG1, REG_ARG2
