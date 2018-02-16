@@ -745,6 +745,7 @@ void objc_moveWeak(id *dest, id *src)
 				return;
 			}
 		}
+		oldRef = (oldRef == NULL) ? NULL : oldRef->next;
 	}
 }
 

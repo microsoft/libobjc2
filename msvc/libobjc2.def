@@ -18,6 +18,9 @@ LIBRARY libobjc2
         objc_setDeveloperMode_np
 
         ; Loader (Compiler Contract)
+	__objc_load_module
+	__objc_resolve_module
+	__objc_resolve_legacy_modules
         __objc_exec_class
         __objc_load_modules
 

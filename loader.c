@@ -133,6 +133,8 @@ void __objc_load_module(struct objc_module_abi_8 *module)
 	objc_init_buffered_statics();
 }
 
+void __objc_resolve_legacy_modules() { }
+
 void __objc_resolve_module(struct objc_module_abi_8 *module)
 {
 	LOCK_RUNTIME_FOR_SCOPE();
