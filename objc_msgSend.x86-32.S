@@ -8,6 +8,12 @@
 
 	mov   (%eax), %eax                    # Load the class
 1:                                        # classLoaded
+	lea   CDECL(_NSConcreteGlobalBlock), %edx
+	mov   (%eax), %ecx
+	cmp   %edx, %ecx
+	jne   9f
+	mov   %ecx, %eax
+9:
 	movl  \sel(%esp), %ecx
 	mov   DTABLE_OFFSET(%eax), %eax       # Load the dtable from the class
 	
