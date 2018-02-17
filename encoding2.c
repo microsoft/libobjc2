@@ -144,7 +144,7 @@ inline static void round_up(size_t *v, size_t b)
 		*v += b - (*v % b);
 	}
 }
-inline static size_t max(size_t v, size_t v2)
+inline static size_t __objc_max(size_t v, size_t v2)
 {
 	return v>v2 ? v : v2;
 }
@@ -249,7 +249,7 @@ static const char *sizeof_union_field(const char *type, size_t *size)
 {
 	size_t field_size = 0;
 	const char *end = sizeof_type(type, &field_size);
-	*size = max(*size, field_size);
+	*size = __objc_max(*size, field_size);
 	return end;
 }
 
@@ -263,7 +263,7 @@ static const char *alignof_type(const char *type, size_t *align)
 #define APPLY_TYPE(typeName, name, capitalizedName, encodingChar) \
 		case encodingChar:\
 		{\
-			*align = max((alignof(typeName) * 8), *align);\
+			*align = __objc_max((alignof(typeName) * 8), *align);\
 			return type + 1;\
 		}
 #define NON_INTEGER_TYPES 1
@@ -271,7 +271,7 @@ static const char *alignof_type(const char *type, size_t *align)
 #include "type_encoding_cases.h"
 		case '@':
 		{
-			*align = max((alignof(id) * 8), *align);\
+			*align = __objc_max((alignof(id) * 8), *align);\
 			if (*(type+1) == '?')
 			{
 				type++;
@@ -288,7 +288,7 @@ static const char *alignof_type(const char *type, size_t *align)
 #define APPLY_TYPE(typeName, name, capitalizedName, encodingChar) \
 		case encodingChar:\
 		{\
-			*align = max((alignof(_Complex typeName) * 8), *align);\
+			*align = __objc_max((alignof(_Complex typeName) * 8), *align);\
 			return type + 1;\
 		}
 #include "type_encoding_cases.h"
@@ -327,7 +327,7 @@ static const char *alignof_type(const char *type, size_t *align)
 		}
 		case '^':
 		{
-			*align = max((alignof(void*) * 8), *align);
+			*align = __objc_max((alignof(void*) * 8), *align);
 			// All pointers look the same to me.
 			size_t ignored = 0;
 			// Skip the definition of the pointeee type.
